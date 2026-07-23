@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Working With Files and Directories – The Unix Shell</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-pipefilter.html" rel="next">
+<link href="./02-filedir.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d099bbf68dda2fcb8e51eb793c421ddb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-create.html"><span class="chapter-title">Working With Files and Directories</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">The Unix Shell</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/swcarpentry/shell-novice" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">The Unix Shell</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-intro.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introducing the Shell</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-filedir.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Navigating Files and Directories</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-create.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Working With Files and Directories</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-pipefilter.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Pipes and Filters</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-loop.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Loops</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-script.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Shell Scripts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-find.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Finding Things</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./setup.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reference.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Summary of Basic Commands</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./discuss.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Discussion</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./instructor-notes.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Instructor Notes</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./learner-profiles.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Learner Profiles</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#creating-directories" id="toc-creating-directories" class="nav-link active" data-scroll-target="#creating-directories">Creating directories</a>
+  <ul class="collapse">
+  <li><a href="#step-one-see-where-we-are-and-what-we-already-have" id="toc-step-one-see-where-we-are-and-what-we-already-have" class="nav-link" data-scroll-target="#step-one-see-where-we-are-and-what-we-already-have">Step one: see where we are and what we already have</a></li>
+  <li><a href="#create-a-directory" id="toc-create-a-directory" class="nav-link" data-scroll-target="#create-a-directory">Create a directory</a></li>
+  <li><a href="#create-a-text-file" id="toc-create-a-text-file" class="nav-link" data-scroll-target="#create-a-text-file">Create a text file</a></li>
+  </ul></li>
+  <li><a href="#moving-files-and-directories" id="toc-moving-files-and-directories" class="nav-link" data-scroll-target="#moving-files-and-directories">Moving files and directories</a></li>
+  <li><a href="#copying-files-and-directories" id="toc-copying-files-and-directories" class="nav-link" data-scroll-target="#copying-files-and-directories">Copying files and directories</a></li>
+  <li><a href="#removing-files-and-directories" id="toc-removing-files-and-directories" class="nav-link" data-scroll-target="#removing-files-and-directories">Removing files and directories</a></li>
+  <li><a href="#operations-with-multiple-files-and-directories" id="toc-operations-with-multiple-files-and-directories" class="nav-link" data-scroll-target="#operations-with-multiple-files-and-directories">Operations with multiple files and directories</a>
+  <ul class="collapse">
+  <li><a href="#using-wildcards-for-accessing-multiple-files-at-once" id="toc-using-wildcards-for-accessing-multiple-files-at-once" class="nav-link" data-scroll-target="#using-wildcards-for-accessing-multiple-files-at-once">Using wildcards for accessing multiple files at once</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">Working With Files and Directories</span></h1>
+<p class="subtitle lead">Episode 3</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="episode-meta">
+<p>Teaching: 30 min  |  Exercises: 20 min</p>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Objectives">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Delete, copy and move specified files and/or directories.</li>
+<li>Create files in that hierarchy using an editor or by copying and renaming existing files.</li>
+<li>Create a directory hierarchy that matches a given diagram.</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Questions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Questions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>How can I create, copy, and delete files and directories?</li>
+<li>How can I edit files?</li>
+</ul>
+</div>
+</div>
+<section id="creating-directories" class="level2">
+<h2 class="anchored" data-anchor-id="creating-directories">Creating directories</h2>
+<p>We now know how to explore files and directories, but how do we create them in the first place?</p>
+<p>In this episode we will learn about creating and moving files and directories, using the <code>exercise-data/writing</code> directory as an example.</p>
+<section id="step-one-see-where-we-are-and-what-we-already-have" class="level3">
+<h3 class="anchored" data-anchor-id="step-one-see-where-we-are-and-what-we-already-have">Step one: see where we are and what we already have</h3>
+<p>We should still be in the <code>shell-lesson-data</code> directory on the Desktop, which we can check using:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="ex">$</span> pwd</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb2-1"><a href="#cb2-1"></a>/Users/nelle/Desktop/shell-lesson-data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Next we’ll move to the <code>exercise-data/writing</code> directory and see what it contains:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">$</span> cd exercise-data/writing/</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">$</span> ls <span class="at">-F</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb4-1"><a href="#cb4-1"></a>haiku.txt  LittleWomen.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="create-a-directory" class="level3">
+<h3 class="anchored" data-anchor-id="create-a-directory">Create a directory</h3>
+<p>Let’s create a new directory called <code>thesis</code> using the command <code>mkdir thesis</code> (which has no output):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">$</span> mkdir thesis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>As you might guess from its name, <code>mkdir</code> means ‘make directory’. Since <code>thesis</code> is a relative path (i.e., does not have a leading slash, like <code>/what/ever/thesis</code>), the new directory is created in the current working directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="ex">$</span> ls <span class="at">-F</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb7-1"><a href="#cb7-1"></a>haiku.txt  LittleWomen.txt  thesis/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Since we’ve just created the <code>thesis</code> directory, there’s nothing in it yet:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="ex">$</span> ls <span class="at">-F</span> thesis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Note that <code>mkdir</code> is not limited to creating single directories one at a time. The <code>-p</code> option allows <code>mkdir</code> to create a directory with nested subdirectories in a single operation:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">$</span> mkdir <span class="at">-p</span> ../project/data ../project/results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Let’s use <code>ls -F</code> to list the new directories we just created in the <code>project</code> directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">$</span> ls <span class="at">-F</span> ../project</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb11-1"><a href="#cb11-1"></a>data/  results/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Instructor Note">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Instructor Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>One could use <code>ls -R</code> to list a directory hierarchy, but rather than introducing it in <code>cp</code> context, <code>find</code> can be used instead and is explained more deeply in the <code>find</code> episode.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Two ways of doing the same thing
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Using the shell to create a directory is no different than using a file explorer. If you open the current directory using your operating system’s graphical file explorer, the <code>thesis</code> directory will appear there too. While the shell and the file explorer are two different ways of interacting with the files, the files and directories themselves are the same.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Good names for files and directories
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Complicated names of files and directories can make your life painful when working on the command line. Here we provide a few useful tips for the names of your files and directories.</p>
+<ol type="1">
+<li>Don’t use spaces.</li>
+</ol>
+<p>Spaces can make a name more meaningful, but since spaces are used to separate arguments on the command line it is better to avoid them in names of files and directories. You can use <code>-</code> or <code>_</code> instead (e.g.&nbsp;<code>north-pacific-gyre/</code> rather than <code>north pacific gyre/</code>). To test this out, try typing <code>mkdir north pacific gyre</code> and see what directory (or directories!) are made when you check with <code>ls -F</code>.</p>
+<ol start="2" type="1">
+<li>Don’t begin the name with <code>-</code> (dash).</li>
+</ol>
+<p>Commands treat names starting with <code>-</code> as options.</p>
+<ol start="3" type="1">
+<li>Stick with lowercase letters, numbers, <code>.</code> (period or ‘full stop’), <code>-</code> (dash) and <code>_</code> (underscore).</li>
+</ol>
+<p>Many other characters have special meanings on the command line. We will learn about some of these during this lesson. There are special characters that can cause your command to not work as expected and can even result in data loss.</p>
+<p>If you need to refer to names of files or directories that have spaces or other special characters, you should surround the name in single <a href="https://www.gnu.org/software/bash/manual/html_node/Quoting.html">quotes</a> (<code>''</code>).</p>
+<p>It is often good practice to use all lowercase letters in names of files and directories; Windows and macOS file systems are typically case insensitive and therefore unable to distinguish between <code>thesis</code> and <code>Thesis</code> in the same directory.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Instructor Note">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Instructor Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Learners can sometimes get trapped within command-line text editors such as Vim, Emacs, or Nano. Closing the terminal emulator and opening a new one can be frustrating as learners will have to navigate to the correct folder again. Our recommendation to mitigate this problem is that instructors should use the same text editor as the learners during workshops (in most cases Nano).</p>
+</div>
+</div>
+</section>
+<section id="create-a-text-file" class="level3">
+<h3 class="anchored">Create a text file</h3>
+<p>Let’s change our working directory to <code>thesis</code> using <code>cd</code>, then run a text editor called Nano to create a file called <code>draft.txt</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="ex">$</span> cd thesis</span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">$</span> nano draft.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Which Editor?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When we say, ‘<code>nano</code> is a text editor’ we really do mean ‘text’. It can only work with plain character data, not tables, images, or any other human-friendly media. We use it in examples because it is one of the least complex text editors. However, because of this trait, it may not be powerful enough or flexible enough for the work you need to do after this workshop. On Unix systems (such as Linux and macOS), many programmers use <a href="https://www.gnu.org/software/emacs/">Emacs</a> or <a href="https://www.vim.org/">Vim</a> (both of which require more time to learn), or a graphical editor such as <a href="https://gedit-text-editor.org/">Gedit</a> or <a href="https://code.visualstudio.com/">VScode</a>. On Windows, you may wish to use <a href="https://notepad-plus-plus.org/">Notepad++</a>. Windows also has a built-in editor called <code>notepad</code> that can be run from the command line in the same way as <code>nano</code> for the purposes of this lesson.</p>
+<p>No matter what editor you use, you will need to know where it searches for and saves files. If you start it from the shell, it will (probably) use your current working directory as its default location. If you use your computer’s start menu, it may want to save files in your Desktop or Documents directory instead. You can change this by navigating to another directory the first time you ‘Save As…’</p>
+</div>
+</div>
+<p>Let’s type in a few lines of text.</p>
+<p><img src="fig/nano-screenshot.png" class="img-fluid" alt="screenshot of nano text editor in action with the text It's not publish or perish any more, it's share and thrive"></p>
+<p>Once we’re happy with our text, we can press <kbd>Ctrl</kbd>+<kbd>O</kbd> (press the <kbd>Ctrl</kbd> or <kbd>Control</kbd> key and, while holding it down, press the <kbd>O</kbd> key) to write our data to disk. We will be asked to provide a name for the file that will contain our text. Press <kbd>Return</kbd> to accept the suggested default of <code>draft.txt</code>.</p>
+<p>Once our file is saved, we can use <kbd>Ctrl</kbd>+<kbd>X</kbd> to quit the editor and return to the shell.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Control, Ctrl, or ^ Key
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The Control key is also called the ‘Ctrl’ key. There are various ways in which using the Control key may be described. For example, you may see an instruction to press the <kbd>Control</kbd> key and, while holding it down, press the <kbd>X</kbd> key, described as any of:</p>
+<ul>
+<li><code>Control-X</code></li>
+<li><code>Control+X</code></li>
+<li><code>Ctrl-X</code></li>
+<li><code>Ctrl+X</code></li>
+<li><code>^X</code></li>
+<li><code>C-x</code></li>
+</ul>
+<p>In nano, along the bottom of the screen you’ll see <code>^G Get Help ^O WriteOut</code>. This means that you can use <code>Control-G</code> to get help and <code>Control-O</code> to save your file.</p>
+</div>
+</div>
+<p><code>nano</code> doesn’t leave any output on the screen after it exits, but <code>ls</code> now shows that we have created a file called <code>draft.txt</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="ex">$</span> ls</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb14-1"><a href="#cb14-1"></a>draft.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="creating-files-a-different-way" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="creating-files-a-different-way">Creating Files a Different Way</h2>
+<p>We have seen how to create text files using the <code>nano</code> editor. Now, try the following command:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="ex">$</span> touch my_file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><p>What did the <code>touch</code> command do? When you look at your current directory using the GUI file explorer, does the file show up?</p></li>
+<li><p>Use <code>ls -l</code> to inspect the files. How large is <code>my_file.txt</code>?</p></li>
+<li><p>When might you want to create a file this way?</p></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<section id="solution" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution">Solution</h2>
+<ol type="1">
+<li><p>The <code>touch</code> command generates a new file called <code>my_file.txt</code> in your current directory. You can observe this newly generated file by typing <code>ls</code> at the command line prompt. <code>my_file.txt</code> can also be viewed in your GUI file explorer.</p></li>
+<li><p>When you inspect the file with <code>ls -l</code>, note that the size of <code>my_file.txt</code> is 0 bytes. In other words, it contains no data. If you open <code>my_file.txt</code> using your text editor it is blank.</p></li>
+<li><p>Some programs do not generate output files themselves, but instead require that empty files have already been generated. When the program is run, it searches for an existing file to populate with its output. The touch command allows you to efficiently generate a blank text file to be used by such programs.</p></li>
+</ol>
+</section>
+</div>
+</div>
+<p>To avoid confusion later on, we suggest removing the file you’ve just created before proceeding with the rest of the episode, otherwise future outputs may vary from those given in the lesson. To do this, use the following command:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="ex">$</span> rm my_file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What’s In A Name?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You may have noticed that all of Nelle’s files are named ‘something dot something’, and in this part of the lesson, we always used the extension <code>.txt</code>. This is just a convention; we can call a file <code>mythesis</code> or almost anything else we want. However, most people use two-part names most of the time to help them (and their programs) tell different kinds of files apart. The second part of such a name is called the <strong>filename extension</strong> and indicates what type of data the file holds: <code>.txt</code> signals a plain text file, <code>.pdf</code> indicates a PDF document, <code>.cfg</code> is a configuration file full of parameters for some program or other, <code>.png</code> is a PNG image, and so on.</p>
+<p>This is just a convention, albeit an important one. Files merely contain bytes; it’s up to us and our programs to interpret those bytes according to the rules for plain text files, PDF documents, configuration files, images, and so on.</p>
+<p>Naming a PNG image of a whale as <code>whale.mp3</code> doesn’t somehow magically turn it into a recording of whale song, though it <em>might</em> cause the operating system to associate the file with a music player program. In this case, if someone double-clicked <code>whale.mp3</code> in a file explorer program, the music player will automatically (and erroneously) attempt to open the <code>whale.mp3</code> file.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="moving-files-and-directories" class="level2">
+<h2 class="anchored" data-anchor-id="moving-files-and-directories">Moving files and directories</h2>
+<p>Returning to the <code>shell-lesson-data/exercise-data/writing</code> directory,</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="ex">$</span> cd ~/Desktop/shell-lesson-data/exercise-data/writing</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In our <code>thesis</code> directory we have a file <code>draft.txt</code> which isn’t a particularly informative name, so let’s change the file’s name using <code>mv</code>, which is short for ‘move’:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="ex">$</span> mv thesis/draft.txt thesis/quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first argument tells <code>mv</code> what we’re ‘moving’, while the second is where it’s to go. In this case, we’re moving <code>thesis/draft.txt</code> to <code>thesis/quotes.txt</code>, which has the same effect as renaming the file. Sure enough, <code>ls</code> shows us that <code>thesis</code> now contains one file called <code>quotes.txt</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="ex">$</span> ls thesis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb20-1"><a href="#cb20-1"></a>quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>One must be careful when specifying the target file name, since <code>mv</code> will silently overwrite any existing file with the same name, which could lead to data loss. By default, <code>mv</code> will not ask for confirmation before overwriting files. However, an additional option, <code>mv -i</code> (or <code>mv --interactive</code>), will cause <code>mv</code> to request such confirmation.</p>
+<p>Note that <code>mv</code> also works on directories.</p>
+<p>Let’s move <code>quotes.txt</code> into the current working directory. We use <code>mv</code> once again, but this time we’ll use just the name of a directory as the second argument to tell <code>mv</code> that we want to keep the filename but put the file somewhere new. (This is why the command is called ‘move’.) In this case, the directory name we use is the special directory name <code>.</code> that we mentioned earlier.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="ex">$</span> mv thesis/quotes.txt .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The effect is to move the file from the directory it was in to the current working directory. <code>ls</code> now shows us that <code>thesis</code> is empty:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="ex">$</span> ls thesis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb23-1"><a href="#cb23-1"></a>$</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Alternatively, we can confirm the file <code>quotes.txt</code> is no longer present in the <code>thesis</code> directory by explicitly trying to list it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="ex">$</span> ls thesis/quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource error number-lines code-with-copy"><code class="sourceCode"><span id="cb25-1"><a href="#cb25-1"></a>ls: cannot access 'thesis/quotes.txt': No such file or directory</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>ls</code> with a filename or directory as an argument only lists the requested file or directory. If the file given as the argument doesn’t exist, the shell returns an error as we saw above. We can use this to see that <code>quotes.txt</code> is now present in our current directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1"></a><span class="ex">$</span> ls quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb27-1"><a href="#cb27-1"></a>quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="moving-files-to-a-new-folder" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="moving-files-to-a-new-folder">Moving Files to a new folder</h2>
+<p>After running the following commands, Jamie realizes that she put the files <code>sucrose.dat</code> and <code>maltose.dat</code> into the wrong folder. The files should have been placed in the <code>raw</code> folder.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1"></a><span class="ex">$</span> ls <span class="at">-F</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a> <span class="ex">analyzed/</span> raw/</span>
+<span id="cb28-3"><a href="#cb28-3"></a><span class="ex">$</span> ls <span class="at">-F</span> analyzed</span>
+<span id="cb28-4"><a href="#cb28-4"></a><span class="ex">fructose.dat</span> glucose.dat maltose.dat sucrose.dat</span>
+<span id="cb28-5"><a href="#cb28-5"></a><span class="ex">$</span> cd analyzed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Fill in the blanks to move these files to the <code>raw/</code> folder (i.e.&nbsp;the one she forgot to put them in)</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1"></a><span class="ex">$</span> mv sucrose.dat maltose.dat ____/____</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<section id="solution-1" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-1">Solution</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1"></a><span class="ex">$</span> mv sucrose.dat maltose.dat ../raw</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Recall that <code>..</code> refers to the parent directory (i.e.&nbsp;one above the current directory) and that <code>.</code> refers to the current directory.</p>
+</section>
+</div>
+</div>
+</section>
+</div>
+</section>
+<section id="copying-files-and-directories" class="level2">
+<h2 class="anchored" data-anchor-id="copying-files-and-directories">Copying files and directories</h2>
+<p>The <code>cp</code> command works very much like <code>mv</code>, except it copies a file instead of moving it. We can check that it did the right thing using <code>ls</code> with two paths as arguments — like most Unix commands, <code>ls</code> can be given multiple paths at once:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1"></a><span class="ex">$</span> cp quotes.txt thesis/quotations.txt</span>
+<span id="cb31-2"><a href="#cb31-2"></a><span class="ex">$</span> ls quotes.txt thesis/quotations.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb32-1"><a href="#cb32-1"></a>quotes.txt   thesis/quotations.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>-r</code> or <code>--recursive</code> option for <code>cp</code> applies the command not just to the specified directory, but to all its contents.</p>
+<p>As an example, we can use this to back up a directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1"></a><span class="ex">$</span> cp <span class="at">-r</span> thesis thesis_backup</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We can check the result by listing the contents of both the <code>thesis</code> and <code>thesis_backup</code> directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1"></a><span class="ex">$</span> ls thesis thesis_backup</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb35-1"><a href="#cb35-1"></a>thesis:</span>
+<span id="cb35-2"><a href="#cb35-2"></a>quotations.txt</span>
+<span id="cb35-3"><a href="#cb35-3"></a></span>
+<span id="cb35-4"><a href="#cb35-4"></a>thesis_backup:</span>
+<span id="cb35-5"><a href="#cb35-5"></a>quotations.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It is important to include the <code>-r</code> flag. If you want to copy a directory and you omit this option you will see a message that the directory has been omitted because <code>-r not specified</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1"></a><span class="ex">$</span> cp thesis thesis_backup</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource error number-lines code-with-copy"><code class="sourceCode"><span id="cb37-1"><a href="#cb37-1"></a>cp: -r not specified; omitting directory 'thesis'</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Destination Can Be New Name or Directory
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When we use two arguments with <code>mv</code> or <code>cp</code>, the second argument can be the location and new name we want our file to have. Alternatively, if we provide the path to an existing directory as the second argument, <code>mv</code>/<code>cp</code> will interpret that to mean that we want the file copied/moved to that directory without changing its name.</p>
+<p>For example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1"></a><span class="ex">$</span> cp quotes.txt thesis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>accomplishes the same thing as</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1"></a><span class="ex">$</span> cp quotes.txt thesis/quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="renaming-files" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="renaming-files">Renaming Files</h2>
+<p>Suppose that you created a plain-text file in your current directory to contain a list of the statistical tests you will need to do to analyze your data, and named it <code>statstics.txt</code></p>
+<p>After creating and saving this file you realize you misspelled the filename! You want to correct the mistake, which of the following commands could you use to do so?</p>
+<ol type="1">
+<li><code>cp statstics.txt statistics.txt</code></li>
+<li><code>mv statstics.txt statistics.txt</code></li>
+<li><code>mv statstics.txt .</code></li>
+<li><code>cp statstics.txt .</code></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<section id="solution-2" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-2">Solution</h2>
+<ol type="1">
+<li>No.&nbsp;While this would create a file with the correct name, the incorrectly named file still exists in the directory and would need to be deleted.</li>
+<li>Yes, this would work to rename the file.</li>
+<li>No, the period(.) indicates where to move the file, but does not provide a new file name; identical file names cannot be created.</li>
+<li>No, the period(.) indicates where to copy the file, but does not provide a new file name; identical file names cannot be created.</li>
+</ol>
+</section>
+</div>
+</div>
+</section>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="moving-and-copying" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="moving-and-copying">Moving and Copying</h2>
+<p>What is the output of the closing <code>ls</code> command in the sequence shown below?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1"></a><span class="ex">$</span> pwd</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb41-1"><a href="#cb41-1"></a>/Users/jamie/data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1"></a><span class="ex">$</span> ls</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb43-1"><a href="#cb43-1"></a>proteins.dat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1"></a><span class="ex">$</span> mkdir recombined</span>
+<span id="cb44-2"><a href="#cb44-2"></a><span class="ex">$</span> mv proteins.dat recombined/</span>
+<span id="cb44-3"><a href="#cb44-3"></a><span class="ex">$</span> cp recombined/proteins.dat ../proteins-saved.dat</span>
+<span id="cb44-4"><a href="#cb44-4"></a><span class="ex">$</span> ls</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><code>proteins-saved.dat recombined</code></li>
+<li><code>recombined</code></li>
+<li><code>proteins.dat recombined</code></li>
+<li><code>proteins-saved.dat</code></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<section id="solution-3" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-3">Solution</h2>
+<p>We start in the <code>/Users/jamie/data</code> directory, and create a new folder called <code>recombined</code>. The second line moves (<code>mv</code>) the file <code>proteins.dat</code> to the new folder (<code>recombined</code>). The third line makes a copy of the file we just moved. The tricky part here is where the file was copied to. Recall that <code>..</code> means ‘go up a level’, so the copied file is now in <code>/Users/jamie</code>. Notice that <code>..</code> is interpreted with respect to the current working directory, <strong>not</strong> with respect to the location of the file being copied. So, the only thing that will show using ls (in <code>/Users/jamie/data</code>) is the recombined folder.</p>
+<ol type="1">
+<li>No, see explanation above. <code>proteins-saved.dat</code> is located at <code>/Users/jamie</code></li>
+<li>Yes</li>
+<li>No, see explanation above. <code>proteins.dat</code> is located at <code>/Users/jamie/data/recombined</code></li>
+<li>No, see explanation above. <code>proteins-saved.dat</code> is located at <code>/Users/jamie</code></li>
+</ol>
+</section>
+</div>
+</div>
+</section>
+</div>
+</section>
+<section id="removing-files-and-directories" class="level2">
+<h2 class="anchored" data-anchor-id="removing-files-and-directories">Removing files and directories</h2>
+<p>Returning to the <code>shell-lesson-data/exercise-data/writing</code> directory, let’s tidy up this directory by removing the <code>quotes.txt</code> file we created. The Unix command we’ll use for this is <code>rm</code> (short for ‘remove’):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1"></a><span class="ex">$</span> rm quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We can confirm the file has gone using <code>ls</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1"></a><span class="ex">$</span> ls quotes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode numberSource error number-lines code-with-copy"><code class="sourceCode"><span id="cb47-1"><a href="#cb47-1"></a>ls: cannot access 'quotes.txt': No such file or directory</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Deleting Is Forever
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The Unix shell doesn’t have a trash bin that we can recover deleted files from (though most graphical interfaces to Unix do). Instead, when we delete files, they are unlinked from the file system so that their storage space on disk can be recycled. Tools for finding and recovering deleted files do exist, but there’s no guarantee they’ll work in any particular situation, since the computer may recycle the file’s disk space right away.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="using-rm-safely" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="using-rm-safely">Using <code>rm</code> Safely</h2>
+<p>What happens when we execute <code>rm -i thesis_backup/quotations.txt</code>? Why would we want this protection when using <code>rm</code>?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
+<section id="solution-4" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-4">Solution</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb48-1"><a href="#cb48-1"></a>rm: remove regular file 'thesis_backup/quotations.txt'? y</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>-i</code> option will prompt before (every) removal (use <kbd>Y</kbd> to confirm deletion or <kbd>N</kbd> to keep the file). The Unix shell doesn’t have a trash bin, so all the files removed will disappear forever. By using the <code>-i</code> option, we have the chance to check that we are deleting only the files that we want to remove.</p>
+</section>
+</div>
+</div>
+</section>
+</div>
+<p>If we try to remove the <code>thesis</code> directory using <code>rm thesis</code>, we get an error message:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1"></a><span class="ex">$</span> rm thesis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode numberSource error number-lines code-with-copy"><code class="sourceCode"><span id="cb50-1"><a href="#cb50-1"></a>rm: cannot remove 'thesis': Is a directory</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This happens because <code>rm</code> by default only works on files, not directories.</p>
+<p><code>rm</code> can remove a directory <em>and all its contents</em> if we use the recursive option <code>-r</code>, and it will do so <em>without any confirmation prompts</em>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb51-1"><a href="#cb51-1"></a><span class="ex">$</span> rm <span class="at">-r</span> thesis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Given that there is no way to retrieve files deleted using the shell, <code>rm -r</code> <em>should be used with great caution</em> (you might consider adding the interactive option <code>rm -r -i</code>).</p>
+</section>
+<section id="operations-with-multiple-files-and-directories" class="level2">
+<h2 class="anchored" data-anchor-id="operations-with-multiple-files-and-directories">Operations with multiple files and directories</h2>
+<p>Oftentimes one needs to copy or move several files at once. This can be done by providing a list of individual filenames, or specifying a naming pattern using wildcards. Wildcards are special characters that can be used to represent unknown characters or sets of characters when navigating the Unix file system.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="copy-with-multiple-filenames" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="copy-with-multiple-filenames">Copy with Multiple Filenames</h2>
+<p>For this exercise, you can test the commands in the <code>shell-lesson-data/exercise-data</code> directory.</p>
+<p>We have seen how <code>cp</code> behaves when given two arguments. The second argument can be a filename (what to name the copy) or an existing directory (where to put the copy).</p>
+<p><code>cp</code> behaves slightly differently when given three or more arguments. Let’s try giving <code>cp</code> three arguments. In the example below, what does <code>cp</code> do when given several filenames and a directory name?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb52-1"><a href="#cb52-1"></a><span class="ex">$</span> mkdir backup</span>
+<span id="cb52-2"><a href="#cb52-2"></a><span class="ex">$</span> cp creatures/minotaur.dat creatures/unicorn.dat backup/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In the example below, what does <code>cp</code> do when given three or more file names?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1"></a><span class="ex">$</span> cd creatures</span>
+<span id="cb53-2"><a href="#cb53-2"></a><span class="ex">$</span> ls <span class="at">-F</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb54-1"><a href="#cb54-1"></a>basilisk.dat  minotaur.dat  unicorn.dat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb55-1"><a href="#cb55-1"></a><span class="ex">$</span> cp minotaur.dat unicorn.dat basilisk.dat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
+<section id="solution-5" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-5">Solution</h2>
+<p>When <code>cp</code> is given three or more arguments, the last argument must be a directory. <code>cp</code> copies the other files specified into that directory. If the last argument is a file name, you get an error:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode numberSource error number-lines code-with-copy"><code class="sourceCode"><span id="cb56-1"><a href="#cb56-1"></a>cp: target 'basilisk.dat' is not a directory</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</div>
+</div>
+</section>
+</div>
+<section id="using-wildcards-for-accessing-multiple-files-at-once" class="level3">
+<h3 class="anchored">Using wildcards for accessing multiple files at once</h3>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Wildcards
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>*</code> is a <strong>wildcard</strong>, which represents zero or more other characters. Let’s consider the <code>shell-lesson-data/exercise-data/alkanes</code> directory: <code>*.pdb</code> represents <code>ethane.pdb</code>, <code>propane.pdb</code>, and every file that ends with ‘.pdb’. On the other hand, <code>p*.pdb</code> only represents <code>pentane.pdb</code> and <code>propane.pdb</code>, because the ‘p’ at the front can only represent filenames that begin with the letter ‘p’.</p>
+<p><code>?</code> is also a wildcard, but it represents exactly one character. So <code>?ethane.pdb</code> could represent <code>methane.pdb</code> whereas <code>*ethane.pdb</code> represents both <code>ethane.pdb</code> and <code>methane.pdb</code>.</p>
+<p>Wildcards can be used in combination with each other. For example, <code>???ane.pdb</code> indicates three characters followed by <code>ane.pdb</code>, giving <code>cubane.pdb  ethane.pdb  octane.pdb</code>.</p>
+<p>When the shell sees a wildcard, it expands the wildcard to create a list of matching filenames <em>before</em> running the preceding command. As an exception, if a wildcard expression does not match any file, Bash will pass the expression as an argument to the command as it is. For example, typing <code>ls *.pdf</code> in the <code>alkanes</code> directory (which contains only files with names ending with <code>.pdb</code>) results in an error message that there is no file called <code>*.pdf</code>. However, generally commands like <code>wc</code> and <code>ls</code> see the lists of file names matching these expressions, but not the wildcards themselves. It is the shell, not the other programs, that expands the wildcards.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="list-filenames-matching-a-pattern" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="list-filenames-matching-a-pattern">List filenames matching a pattern</h2>
+<p>When run in the <code>alkanes</code> directory, which <code>ls</code> command(s) will produce this output?</p>
+<p><code>ethane.pdb   methane.pdb</code></p>
+<ol type="1">
+<li><code>ls *t*ane.pdb</code></li>
+<li><code>ls *t?ne.*</code></li>
+<li><code>ls *t??ne.pdb</code></li>
+<li><code>ls ethane.*</code></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
+<section id="solution-6" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-6">Solution</h2>
+<p>The solution is <code>3.</code></p>
+<p><code>1.</code> shows all files whose names contain zero or more characters (<code>*</code>) followed by the letter <code>t</code>, then zero or more characters (<code>*</code>) followed by <code>ane.pdb</code>. This gives <code>ethane.pdb  methane.pdb  octane.pdb  pentane.pdb</code>.</p>
+<p><code>2.</code> shows all files whose names start with zero or more characters (<code>*</code>) followed by the letter <code>t</code>, then a single character (<code>?</code>), then <code>ne.</code> followed by zero or more characters (<code>*</code>). This will give us <code>octane.pdb</code> and <code>pentane.pdb</code> but doesn’t match anything which ends in <code>thane.pdb</code>.</p>
+<p><code>3.</code> fixes the problems of option 2 by matching two characters (<code>??</code>) between <code>t</code> and <code>ne</code>. This is the solution.</p>
+<p><code>4.</code> only shows files starting with <code>ethane.</code>.</p>
+</section>
+</div>
+</div>
+</section>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="more-on-wildcards" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="more-on-wildcards">More on Wildcards</h2>
+<p>Sam has a directory containing calibration data, datasets, and descriptions of the datasets:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb57-1"><a href="#cb57-1"></a><span class="bu">.</span></span>
+<span id="cb57-2"><a href="#cb57-2"></a><span class="ex">├──</span> 2015-10-23-calibration.txt</span>
+<span id="cb57-3"><a href="#cb57-3"></a><span class="ex">├──</span> 2015-10-23-dataset1.txt</span>
+<span id="cb57-4"><a href="#cb57-4"></a><span class="ex">├──</span> 2015-10-23-dataset2.txt</span>
+<span id="cb57-5"><a href="#cb57-5"></a><span class="ex">├──</span> 2015-10-23-dataset_overview.txt</span>
+<span id="cb57-6"><a href="#cb57-6"></a><span class="ex">├──</span> 2015-10-26-calibration.txt</span>
+<span id="cb57-7"><a href="#cb57-7"></a><span class="ex">├──</span> 2015-10-26-dataset1.txt</span>
+<span id="cb57-8"><a href="#cb57-8"></a><span class="ex">├──</span> 2015-10-26-dataset2.txt</span>
+<span id="cb57-9"><a href="#cb57-9"></a><span class="ex">├──</span> 2015-10-26-dataset_overview.txt</span>
+<span id="cb57-10"><a href="#cb57-10"></a><span class="ex">├──</span> 2015-11-23-calibration.txt</span>
+<span id="cb57-11"><a href="#cb57-11"></a><span class="ex">├──</span> 2015-11-23-dataset1.txt</span>
+<span id="cb57-12"><a href="#cb57-12"></a><span class="ex">├──</span> 2015-11-23-dataset2.txt</span>
+<span id="cb57-13"><a href="#cb57-13"></a><span class="ex">├──</span> 2015-11-23-dataset_overview.txt</span>
+<span id="cb57-14"><a href="#cb57-14"></a><span class="ex">├──</span> backup</span>
+<span id="cb57-15"><a href="#cb57-15"></a><span class="ex">│&nbsp;&nbsp;</span> ├── calibration</span>
+<span id="cb57-16"><a href="#cb57-16"></a><span class="ex">│&nbsp;&nbsp;</span> └── datasets</span>
+<span id="cb57-17"><a href="#cb57-17"></a><span class="ex">└──</span> send_to_bob</span>
+<span id="cb57-18"><a href="#cb57-18"></a>    <span class="ex">├──</span> all_datasets_created_on_a_23rd</span>
+<span id="cb57-19"><a href="#cb57-19"></a>    <span class="ex">└──</span> all_november_files</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Before heading off to another field trip, she wants to back up her data and send some datasets to her colleague Bob. Sam uses the following commands to get the job done:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb58-1"><a href="#cb58-1"></a><span class="ex">$</span> cp <span class="pp">*</span>dataset<span class="pp">*</span> backup/datasets</span>
+<span id="cb58-2"><a href="#cb58-2"></a><span class="ex">$</span> cp ____calibration____ backup/calibration</span>
+<span id="cb58-3"><a href="#cb58-3"></a><span class="ex">$</span> cp 2015-____-____ send_to_bob/all_november_files/</span>
+<span id="cb58-4"><a href="#cb58-4"></a><span class="ex">$</span> cp ____ send_to_bob/all_datasets_created_on_a_23rd/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Help Sam by filling in the blanks.</p>
+<p>The resulting directory structure should look like this</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb59-1"><a href="#cb59-1"></a><span class="bu">.</span></span>
+<span id="cb59-2"><a href="#cb59-2"></a><span class="ex">├──</span> 2015-10-23-calibration.txt</span>
+<span id="cb59-3"><a href="#cb59-3"></a><span class="ex">├──</span> 2015-10-23-dataset1.txt</span>
+<span id="cb59-4"><a href="#cb59-4"></a><span class="ex">├──</span> 2015-10-23-dataset2.txt</span>
+<span id="cb59-5"><a href="#cb59-5"></a><span class="ex">├──</span> 2015-10-23-dataset_overview.txt</span>
+<span id="cb59-6"><a href="#cb59-6"></a><span class="ex">├──</span> 2015-10-26-calibration.txt</span>
+<span id="cb59-7"><a href="#cb59-7"></a><span class="ex">├──</span> 2015-10-26-dataset1.txt</span>
+<span id="cb59-8"><a href="#cb59-8"></a><span class="ex">├──</span> 2015-10-26-dataset2.txt</span>
+<span id="cb59-9"><a href="#cb59-9"></a><span class="ex">├──</span> 2015-10-26-dataset_overview.txt</span>
+<span id="cb59-10"><a href="#cb59-10"></a><span class="ex">├──</span> 2015-11-23-calibration.txt</span>
+<span id="cb59-11"><a href="#cb59-11"></a><span class="ex">├──</span> 2015-11-23-dataset1.txt</span>
+<span id="cb59-12"><a href="#cb59-12"></a><span class="ex">├──</span> 2015-11-23-dataset2.txt</span>
+<span id="cb59-13"><a href="#cb59-13"></a><span class="ex">├──</span> 2015-11-23-dataset_overview.txt</span>
+<span id="cb59-14"><a href="#cb59-14"></a><span class="ex">├──</span> backup</span>
+<span id="cb59-15"><a href="#cb59-15"></a><span class="ex">│&nbsp;&nbsp;</span> ├── calibration</span>
+<span id="cb59-16"><a href="#cb59-16"></a><span class="ex">│&nbsp;&nbsp;</span> │&nbsp;&nbsp; ├── 2015-10-23-calibration.txt</span>
+<span id="cb59-17"><a href="#cb59-17"></a><span class="ex">│&nbsp;&nbsp;</span> │&nbsp;&nbsp; ├── 2015-10-26-calibration.txt</span>
+<span id="cb59-18"><a href="#cb59-18"></a><span class="ex">│&nbsp;&nbsp;</span> │&nbsp;&nbsp; └── 2015-11-23-calibration.txt</span>
+<span id="cb59-19"><a href="#cb59-19"></a><span class="ex">│&nbsp;&nbsp;</span> └── datasets</span>
+<span id="cb59-20"><a href="#cb59-20"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-10-23-dataset1.txt</span>
+<span id="cb59-21"><a href="#cb59-21"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-10-23-dataset2.txt</span>
+<span id="cb59-22"><a href="#cb59-22"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-10-23-dataset_overview.txt</span>
+<span id="cb59-23"><a href="#cb59-23"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-10-26-dataset1.txt</span>
+<span id="cb59-24"><a href="#cb59-24"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-10-26-dataset2.txt</span>
+<span id="cb59-25"><a href="#cb59-25"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-10-26-dataset_overview.txt</span>
+<span id="cb59-26"><a href="#cb59-26"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-11-23-dataset1.txt</span>
+<span id="cb59-27"><a href="#cb59-27"></a><span class="ex">│&nbsp;&nbsp;</span>     ├── 2015-11-23-dataset2.txt</span>
+<span id="cb59-28"><a href="#cb59-28"></a><span class="ex">│&nbsp;&nbsp;</span>     └── 2015-11-23-dataset_overview.txt</span>
+<span id="cb59-29"><a href="#cb59-29"></a><span class="ex">└──</span> send_to_bob</span>
+<span id="cb59-30"><a href="#cb59-30"></a>    <span class="ex">├──</span> all_datasets_created_on_a_23rd</span>
+<span id="cb59-31"><a href="#cb59-31"></a>    <span class="ex">│&nbsp;&nbsp;</span> ├── 2015-10-23-dataset1.txt</span>
+<span id="cb59-32"><a href="#cb59-32"></a>    <span class="ex">│&nbsp;&nbsp;</span> ├── 2015-10-23-dataset2.txt</span>
+<span id="cb59-33"><a href="#cb59-33"></a>    <span class="ex">│&nbsp;&nbsp;</span> ├── 2015-10-23-dataset_overview.txt</span>
+<span id="cb59-34"><a href="#cb59-34"></a>    <span class="ex">│&nbsp;&nbsp;</span> ├── 2015-11-23-dataset1.txt</span>
+<span id="cb59-35"><a href="#cb59-35"></a>    <span class="ex">│&nbsp;&nbsp;</span> ├── 2015-11-23-dataset2.txt</span>
+<span id="cb59-36"><a href="#cb59-36"></a>    <span class="ex">│&nbsp;&nbsp;</span> └── 2015-11-23-dataset_overview.txt</span>
+<span id="cb59-37"><a href="#cb59-37"></a>    <span class="ex">└──</span> all_november_files</span>
+<span id="cb59-38"><a href="#cb59-38"></a>        <span class="ex">├──</span> 2015-11-23-calibration.txt</span>
+<span id="cb59-39"><a href="#cb59-39"></a>        <span class="ex">├──</span> 2015-11-23-dataset1.txt</span>
+<span id="cb59-40"><a href="#cb59-40"></a>        <span class="ex">├──</span> 2015-11-23-dataset2.txt</span>
+<span id="cb59-41"><a href="#cb59-41"></a>        <span class="ex">└──</span> 2015-11-23-dataset_overview.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-27" class="callout-27-contents callout-collapse collapse">
+<section id="solution-7" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-7">Solution</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb60-1"><a href="#cb60-1"></a><span class="ex">$</span> cp <span class="pp">*</span>calibration.txt backup/calibration</span>
+<span id="cb60-2"><a href="#cb60-2"></a><span class="ex">$</span> cp 2015-11-<span class="pp">*</span> send_to_bob/all_november_files/</span>
+<span id="cb60-3"><a href="#cb60-3"></a><span class="ex">$</span> cp <span class="pp">*</span>-23-dataset<span class="pp">*</span> send_to_bob/all_datasets_created_on_a_23rd/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</div>
+</div>
+</section>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="organizing-directories-and-files" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="organizing-directories-and-files">Organizing Directories and Files</h2>
+<p>Jamie is working on a project, and she sees that her files aren’t very well organized:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb61-1"><a href="#cb61-1"></a><span class="ex">$</span> ls <span class="at">-F</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb62-1"><a href="#cb62-1"></a>analyzed/  fructose.dat    raw/   sucrose.dat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>fructose.dat</code> and <code>sucrose.dat</code> files contain output from her data analysis. What command(s) covered in this lesson does she need to run so that the commands below will produce the output shown?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb63-1"><a href="#cb63-1"></a><span class="ex">$</span> ls <span class="at">-F</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb64-1"><a href="#cb64-1"></a>analyzed/   raw/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb65-1"><a href="#cb65-1"></a><span class="ex">$</span> ls analyzed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb66"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb66-1"><a href="#cb66-1"></a>fructose.dat    sucrose.dat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-29-contents" aria-controls="callout-29" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-29" class="callout-29-contents callout-collapse collapse">
+<section id="solution-8" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-8">Solution</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb67-1"><a href="#cb67-1"></a><span class="fu">mv</span> <span class="pp">*</span>.dat analyzed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Jamie needs to move her files <code>fructose.dat</code> and <code>sucrose.dat</code> to the <code>analyzed</code> directory. The shell will expand *.dat to match all .dat files in the current directory. The <code>mv</code> command then moves the list of .dat files to the ‘analyzed’ directory.</p>
+</section>
+</div>
+</div>
+</section>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Challenge">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Challenge
+</div>
+</div>
+<section id="reproduce-a-folder-structure" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="reproduce-a-folder-structure">Reproduce a folder structure</h2>
+<p>You’re starting a new experiment and would like to duplicate the directory structure from your previous experiment so you can add new data.</p>
+<p>Assume that the previous experiment is in a folder called <code>2016-05-18</code>, which contains a <code>data</code> folder that in turn contains folders named <code>raw</code> and <code>processed</code> that contain data files. The goal is to copy the folder structure of the <code>2016-05-18</code> folder into a folder called <code>2016-05-20</code> so that your final directory structure looks like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb68"><pre class="sourceCode numberSource output number-lines code-with-copy"><code class="sourceCode"><span id="cb68-1"><a href="#cb68-1"></a>2016-05-20/</span>
+<span id="cb68-2"><a href="#cb68-2"></a>└── data</span>
+<span id="cb68-3"><a href="#cb68-3"></a>   ├── processed</span>
+<span id="cb68-4"><a href="#cb68-4"></a>   └── raw</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Which of the following set of commands would achieve this objective? What would the other commands do?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb69-1"><a href="#cb69-1"></a><span class="ex">$</span> mkdir 2016-05-20</span>
+<span id="cb69-2"><a href="#cb69-2"></a><span class="ex">$</span> mkdir 2016-05-20/data</span>
+<span id="cb69-3"><a href="#cb69-3"></a><span class="ex">$</span> mkdir 2016-05-20/data/processed</span>
+<span id="cb69-4"><a href="#cb69-4"></a><span class="ex">$</span> mkdir 2016-05-20/data/raw</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb70-1"><a href="#cb70-1"></a><span class="ex">$</span> mkdir 2016-05-20</span>
+<span id="cb70-2"><a href="#cb70-2"></a><span class="ex">$</span> cd 2016-05-20</span>
+<span id="cb70-3"><a href="#cb70-3"></a><span class="ex">$</span> mkdir data</span>
+<span id="cb70-4"><a href="#cb70-4"></a><span class="ex">$</span> cd data</span>
+<span id="cb70-5"><a href="#cb70-5"></a><span class="ex">$</span> mkdir raw processed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb71-1"><a href="#cb71-1"></a><span class="ex">$</span> mkdir 2016-05-20/data/raw</span>
+<span id="cb71-2"><a href="#cb71-2"></a><span class="ex">$</span> mkdir 2016-05-20/data/processed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb72"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb72-1"><a href="#cb72-1"></a><span class="ex">$</span> mkdir <span class="at">-p</span> 2016-05-20/data/raw</span>
+<span id="cb72-2"><a href="#cb72-2"></a><span class="ex">$</span> mkdir <span class="at">-p</span> 2016-05-20/data/processed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb73-1"><a href="#cb73-1"></a><span class="ex">$</span> mkdir 2016-05-20</span>
+<span id="cb73-2"><a href="#cb73-2"></a><span class="ex">$</span> cd 2016-05-20</span>
+<span id="cb73-3"><a href="#cb73-3"></a><span class="ex">$</span> mkdir data</span>
+<span id="cb73-4"><a href="#cb73-4"></a><span class="ex">$</span> mkdir raw processed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-31-contents" aria-controls="callout-31" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-31" class="callout-31-contents callout-collapse collapse">
+<section id="solution-9" class="level2 callout-body-container callout-body">
+<h2 class="anchored" data-anchor-id="solution-9">Solution</h2>
+<p>The first two sets of commands achieve this objective. The first set uses relative paths to create the top-level directory before the subdirectories.</p>
+<p>The third set of commands will give an error because the default behavior of <code>mkdir</code> won’t create a subdirectory of a non-existent directory: the intermediate level folders must be created first.</p>
+<p>The fourth set of commands achieve this objective. Remember, the <code>-p</code> option, followed by a path of one or more directories, will cause <code>mkdir</code> to create any intermediate subdirectories as required.</p>
+<p>The final set of commands generates the ‘raw’ and ‘processed’ directories at the same level as the ‘data’ directory.</p>
+</section>
+</div>
+</div>
+</section>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key Points">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Key Points
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><code>cp [old] [new]</code> copies a file.</li>
+<li><code>mkdir [path]</code> creates a new directory.</li>
+<li><code>mv [old] [new]</code> moves (renames) a file or directory.</li>
+<li><code>rm [path]</code> removes (deletes) a file.</li>
+<li><code>*</code> matches zero or more characters in a filename, so <code>*.txt</code> matches all files ending in <code>.txt</code>.</li>
+<li><code>?</code> matches any single character in a filename, so <code>?.txt</code> matches <code>a.txt</code> but not <code>any.txt</code>.</li>
+<li>Use of the Control key may be described in many ways, including <code>Ctrl-X</code>, <code>Control-X</code>, and <code>^X</code>.</li>
+<li>The shell does not have a trash bin: once something is deleted, it’s really gone.</li>
+<li>Most files’ names are <code>something.extension</code>. The extension isn’t required, and doesn’t guarantee anything, but is normally used to indicate the type of data in the file.</li>
+<li>Depending on the type of work you do, you may need a more powerful text editor than Nano.</li>
+</ul>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-filedir.html" class="pagination-link" aria-label="Navigating Files and Directories">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Navigating Files and Directories</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-pipefilter.html" class="pagination-link" aria-label="Pipes and Filters">
+        <span class="nav-page-text"><span class="chapter-title">Pipes and Filters</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
