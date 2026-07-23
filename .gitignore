@@ -32,7 +32,7 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 # pkgdown site
-docs/
+# docs/
 # translation temp files
 po/*~
 # renv detritus
@@ -53,3 +53,9 @@ vendor/
 .docker-vendor/
 Gemfile.lock
 .*history
+
+/.quarto/
+**/*.quarto_ipynb
+.tex-cache
+*.tex
+index_files
